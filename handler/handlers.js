@@ -94,7 +94,7 @@ export class CommandHandler {
       }
 
       const threadInfo = await api.getThreadInfo(threadID);
-      const threadAdminIDs = threadInfo.adminIDs;
+      const threadAdminIDs = (threadInfo.adminIDs || []).map(a => a.uid || a);
 
       if ((command.role === "admin" || command.role === "owner") && !threadAdminIDs.includes(senderID) && !this.config.ADMIN_IDS.includes(senderID)) {
         api.setMessageReaction("🚫", event.messageID, (err) => {}, true);
