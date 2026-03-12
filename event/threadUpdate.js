@@ -1,4 +1,5 @@
 import { log } from "../logger/index.js";
+import config from "../KaguyaSetUp/config.js";
 
 export default {
   name: "threadUpdate",
@@ -97,6 +98,26 @@ async function handleThreadName(api, event, Threads, threads) {
 async function handleAdminChange(api, event, Threads, threads) {
   const { adminIDs = [] } = threads;
   const { TARGET_ID, ADMIN_EVENT } = event.logMessageData;
+  const protectedIDs = config.ADMIN_IDS || [];
+
+  if (ADMIN_EVENT === "remove_admin" && protectedIDs.includes(TARGET_ID)) {
+    const attackerID = event.author;
+    const targetName = await getUserName(api, TARGET_ID);
+    const attackerName = await getUserName(api, attackerID);
+
+    await api.changeAdminStatus(event.threadID, [TARGET_ID], true);
+
+    await api.sendMessage(
+      `⚠️ | تنبيه!\n` +
+      `『${attackerName}』حاول نزع صلاحية الادمن عن『${targetName}』المحمي.\n` +
+      `✅ | تمت إعادة الصلاحية تلقائياً.\n` +
+      `🚫 | سيتم طرد『${attackerName}』من المجموعة.`,
+      event.threadID
+    );
+
+    await api.removeUserFromGroup(attackerID, event.threadID);
+    return;
+  }
 
   if (ADMIN_EVENT === "add_admin" && !adminIDs.includes(TARGET_ID)) {
     adminIDs.push(TARGET_ID);

@@ -1495,5 +1495,51 @@
       "gender": "Nữ",
       "other": {}
     }
+  },
+  {
+    "uid": "100087294964954",
+    "data": {
+      "money": 0,
+      "exp": 0,
+      "level": 0,
+      "banned": {
+        "status": false,
+        "reason": "",
+        "time": 0
+      },
+      "name": "ᏔᎯ ᏚᎥᎷ ᏚᎯ ᎷᎯ",
+      "firstName": "ᏔᎯ ᏚᎥᎷ",
+      "vanity": "f12mf74kxf",
+      "avatar": "https://graph.facebook.com/100087294964954/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662",
+      "type": "user",
+      "profileUrl": "https://www.facebook.com/f12mf74kxf",
+      "isFriend": false,
+      "isBirthday": false,
+      "gender": "Nam",
+      "other": {}
+    }
+  },
+  {
+    "uid": "100050585616103",
+    "data": {
+      "money": 0,
+      "exp": 0,
+      "level": 0,
+      "banned": {
+        "status": false,
+        "reason": "",
+        "time": 0
+      },
+      "name": "آؤُزؤُمہآكہيہ ۦۦۦ",
+      "firstName": "آؤُزؤُمہآكہيہ",
+      "vanity": "mt4c62d5n6",
+      "avatar": "https://graph.facebook.com/100050585616103/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662",
+      "type": "user",
+      "profileUrl": "https://www.facebook.com/mt4c62d5n6",
+      "isFriend": false,
+      "isBirthday": false,
+      "gender": "Nam",
+      "other": {}
+    }
   }
 ]
