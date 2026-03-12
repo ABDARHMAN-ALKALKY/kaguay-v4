@@ -1,6 +1,6 @@
 class Restart {
   constructor() {
-    this.name = "restart";               // اسم الأمر
+    this.name = "اعادة تشغيل";               // اسم الأمر
     this.aliases = ["ريستارت", "إعادة تشغيل"];
     this.description = "إعادة تشغيل البوت (Owner only)";
     this.role = "owner";                 // فقط المالك يستطيع استخدامه
