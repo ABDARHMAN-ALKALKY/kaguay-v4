@@ -4,6 +4,7 @@ import path from 'path';
 import moment from 'moment-timezone';
 
 async function execute({ api, event, Users, Threads }) {
+  try {
   switch (event.logMessageType) {
     case "log:subscribe": {
       const { addedParticipants } = event.logMessageData;
@@ -32,6 +33,9 @@ async function execute({ api, event, Users, Threads }) {
       }
       break;
     }
+  }
+  } catch (err) {
+    console.error("[ترحيب] خطأ:", err);
   }
 }
 

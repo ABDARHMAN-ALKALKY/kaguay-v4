@@ -3,9 +3,11 @@ import fs from 'fs';
 import path from 'path';
 import moment from 'moment-timezone';
 import jimp from 'jimp';
+import config from '../KaguyaSetUp/config.js';
 
 async function execute({ api, event, Users, Threads }) {
-  const ownerFbIds = ["100076269693499"];  // قائمة بمعرفات الفيسبوك لأصحاب البوت المصرح لهم
+  try {
+  const ownerFbIds = config.ADMIN_IDS || [];  // معرّفات المصرح لهم من الكونفيغ
 
   switch (event.logMessageType) {
     case "log:unsubscribe": {
@@ -39,27 +41,42 @@ async function execute({ api, event, Users, Threads }) {
       break;  // لا ترسل رسالة ترحيب
     }
   }
+  } catch (err) {
+    console.error("[ترحيب_ومغادرة] خطأ:", err);
+  }
 }
 
 async function handleBotAddition(api, event, ownerFbIds) {
-  const threadInfo = await api.getThreadInfo(event.threadID);
-  const threadName = threadInfo.threadName || "Unknown";
-  const membersCount = threadInfo.participantIDs.length;
-  const addedBy = event.author;
-  const addedByInfo = await api.getUserInfo(addedBy);
-  const addedByName = addedByInfo[addedBy]?.name || "Unknown";
+  try {
+    const threadInfo = await api.getThreadInfo(event.threadID);
+    const threadName = threadInfo.threadName || "Unknown";
+    const membersCount = threadInfo.participantIDs.length;
+    const addedBy = event.author;
+    const addedByInfo = await api.getUserInfo(addedBy);
+    const addedByName = addedByInfo[addedBy]?.name || "Unknown";
 
-  if (!ownerFbIds.includes(addedBy)) {
-    const notifyOwnerMessage = `⚠️ إشعار: تم إضافة البوت إلى مجموعة جديدة! \n📍 اسم المجموعة: ${threadName} \n🔢 عدد الأعضاء: ${membersCount} \n🧑‍💼 بواسطة: ${addedByName}`;
-    await api.sendMessage(notifyOwnerMessage, ownerFbIds[0]);
+    if (!ownerFbIds.includes(addedBy)) {
+      try {
+        const notifyMsg = `⚠️ إشعار: تم إضافة البوت إلى مجموعة جديدة!\n📍 اسم المجموعة: ${threadName}\n🔢 عدد الأعضاء: ${membersCount}\n🧑‍💼 بواسطة: ${addedByName}`;
+        await api.sendMessage(notifyMsg, ownerFbIds[0]);
+      } catch (_) {}
 
-    const exitMessage = `⚠️ | إضافة البوت بدون إذن غير مسموح يرجى التواصل مع المطور من أجل الحصول على الموافقة \n 📞 | رابـط الـمـطـور : https://www.facebook.com/profile.php?id=100076269693499`;
-    await api.sendMessage(exitMessage, event.threadID);
+      try {
+        const exitMessage = `⚠️ | إضافة البوت بدون إذن غير مسموح يرجى التواصل مع المطور من أجل الحصول على الموافقة\n📞 | رابـط الـمـطـور : https://www.facebook.com/4z6h37byo8`;
+        await api.sendMessage(exitMessage, event.threadID);
+      } catch (_) {}
 
-    await api.removeUserFromGroup(api.getCurrentUserID(), event.threadID);
-  } else {
-    const notifyOwnerMessage = `⚠️ إشعار: تم إضافة البوت إلى مجموعة جديدة! \n📍 اسم المجموعة: ${threadName} \n🔢 عدد الأعضاء: ${membersCount}`;
-    await api.sendMessage(notifyOwnerMessage, ownerFbIds[0]);
+      try {
+        await api.removeUserFromGroup(api.getCurrentUserID(), event.threadID);
+      } catch (_) {}
+    } else {
+      try {
+        const notifyMsg = `⚠️ إشعار: تم إضافة البوت إلى مجموعة جديدة!\n📍 اسم المجموعة: ${threadName}\n🔢 عدد الأعضاء: ${membersCount}`;
+        await api.sendMessage(notifyMsg, ownerFbIds[0]);
+      } catch (_) {}
+    }
+  } catch (err) {
+    console.error("[handleBotAddition] خطأ:", err);
   }
 }
 

@@ -1,73 +1,79 @@
 import { log } from "../logger/index.js";
-import fs from "fs";
-import axios from "axios";
-import path from "path";
+import config from "../KaguyaSetUp/config.js";
 
 export default {
   name: "subscribe",
   execute: async ({ api, event, Threads, Users }) => {
-    // جلب بيانات المجموعة
-    var threads = (await Threads.find(event.threadID))?.data?.data;
+    try {
+      const threadsData = await Threads.find(event.threadID);
+      const threads = threadsData?.data?.data || null;
 
-    // التحقق من وجود بيانات المجموعة
-    if (!threads) {
-      await Threads.create(event.threadID);
-    }
-
-    switch (event.logMessageType) {
-      case "log:unsubscribe": {
-        // إذا تم طرد البوت من المجموعة
-        if (event.logMessageData.leftParticipantFbId == api.getCurrentUserID()) {
-          await Threads.remove(event.threadID);
-          return log([
-            {
-              message: "[ THREADS ]: ",
-              color: "yellow",
-            },
-            {
-              message: `تم حذف بيانات المجموعة مع المعرف: ${event.threadID} لأن البوت تم طرده.`,
-              color: "green",
-            },
-          ]);
-        }
-        // تحديث عدد الأعضاء بعد خروج شخص
-        await Threads.update(event.threadID, {
-          members: +threads.members - 1,
-        });
-        break;
+      if (!threads) {
+        await Threads.create(event.threadID);
       }
 
-      case "log:subscribe": {
-        // إذا تمت إضافة البوت إلى المجموعة
-        if (event.logMessageData.addedParticipants.some((i) => i.userFbId == api.getCurrentUserID())) {
-          // حذف رسالة التوصيل
-          api.unsendMessage(event.messageID);
+      switch (event.logMessageType) {
+        case "log:unsubscribe": {
+          if (event.logMessageData.leftParticipantFbId == api.getCurrentUserID()) {
+            await Threads.remove(event.threadID);
+            return log([
+              { message: "[ THREADS ]: ", color: "yellow" },
+              { message: `تم حذف بيانات المجموعة مع المعرف: ${event.threadID} لأن البوت تم طرده.`, color: "green" },
+            ]);
+          }
+          if (threads) {
+            await Threads.update(event.threadID, {
+              members: Math.max(0, (+threads.members || 1) - 1),
+            });
+          }
+          break;
+        }
 
-          // تغيير اسم البوت عند إضافته إلى المجموعة
-          const botName = "𝙔𝙐𝙆𝙊"; // اسم البوت
-          api.changeNickname(
-            `》 《 ❃ ➠ ${botName}`,
-            event.threadID,
-            api.getCurrentUserID()
+        case "log:subscribe": {
+          const botID = api.getCurrentUserID();
+          const botAdded = event.logMessageData.addedParticipants.some(
+            (i) => i.userFbId == botID
           );
 
-          // رسالة الترحيب عند إضافة البوت فقط
-          const welcomeMessage = `✅ | تــم الــتــوصــيــل بـنـجـاح\n❏ الـرمـز : 『بدون رمز』\n❏ إسـم الـبـوت : 『𝙔𝙐𝙆𝙊』\nالــمــالــك : 『هيـتوري』\n╼╾─────⊹⊱⊰⊹─────╼╾\n⚠️  |  اكتب قائمة او اوامر او تقرير في حالة واجهتك أي مشكلة\n╼╾─────⊹⊱⊰⊹─────╼╾\n ⪨༒𓊈𒆜 𝐇𝐈𝐓𝐎𝐑𝐈 𝐒𝐀𝐌𝐀 𒆜𓊉༒⪩ \n╼╾─────⊹⊱⊰⊹─────╼╾\n❏ رابـط الـمـطـور : \nhttps://www.facebook.com/4z6h37byo8`;
+          if (botAdded) {
+            try { await api.unsendMessage(event.messageID); } catch (_) {}
 
-          // إرسال رسالة الترحيب عند إضافة البوت فقط
-          api.sendMessage(welcomeMessage, event.threadID);
-        } else {
-          // إذا تم إضافة أعضاء آخرين، فقط تحديث عدد الأعضاء بدون رسائل
-          for (let i of event.logMessageData.addedParticipants) {
-            await Users.create(i.userFbId);
+            try {
+              await api.changeNickname(
+                `》 《 ❃ ➠ 𝙔𝙐𝙆𝙊`,
+                event.threadID,
+                botID
+              );
+            } catch (_) {}
+
+            const welcomeMessage =
+              `✅ | تــم الــتــوصــيــل بـنـجـاح\n` +
+              `❏ الـرمـز : 『بدون رمز』\n` +
+              `❏ إسـم الـبـوت : 『𝙔𝙐𝙆𝙊』\n` +
+              `الــمــالــك : 『هيـتوري』\n` +
+              `╼╾─────⊹⊱⊰⊹─────╼╾\n` +
+              `⚠️  |  اكتب قائمة او اوامر او تقرير في حالة واجهتك أي مشكلة\n` +
+              `╼╾─────⊹⊱⊰⊹─────╼╾\n` +
+              ` ⪨༒𓊈𒆜 𝐇𝐈𝐓𝐎𝐑𝐈 𝐒𝐀𝐌𝐀 𒆜𓊉༒⪩ \n` +
+              `╼╾─────⊹⊱⊰⊹─────╼╾\n` +
+              `❏ رابـط الـمـطـور : \nhttps://www.facebook.com/4z6h37byo8`;
+
+            try { await api.sendMessage(welcomeMessage, event.threadID); } catch (_) {}
+          } else {
+            for (let i of event.logMessageData.addedParticipants) {
+              try { await Users.create(i.userFbId); } catch (_) {}
+            }
+            if (threads) {
+              await Threads.update(event.threadID, {
+                members: (+threads.members || 0) + event.logMessageData.addedParticipants.length,
+              });
+            }
           }
-          // تحديث عدد الأعضاء بعد إضافة أشخاص
-          await Threads.update(event.threadID, {
-            members: +threads.members + +event.logMessageData.addedParticipants.length,
-          });
+          break;
         }
-        break;
       }
+    } catch (err) {
+      console.error("[subscribe] خطأ:", err);
     }
   },
 };
