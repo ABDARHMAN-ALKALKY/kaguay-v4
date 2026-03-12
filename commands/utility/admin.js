@@ -57,7 +57,7 @@ class Admin {
       const userInfo = await api.getUserInfo(targetID);
       const targetName = userInfo?.[targetID]?.name || targetID;
 
-      await api.changeAdminStatus(threadID, [targetID], isPromote);
+      await api.changeAdminStatus(String(threadID), [targetID], isPromote);
 
       const emoji = isPromote ? "👑" : "🚫";
       const actionText = isPromote ? "تم رفع" : "تم نزع";
@@ -68,11 +68,15 @@ class Admin {
         threadID
       );
     } catch (err) {
-      await api.sendMessage(
-        `❌ | فشلت العملية. تأكد من أن البوت لديه صلاحيات الإدارة.`,
-        threadID,
-        messageID
-      );
+      console.error("[ادمن] خطأ:", JSON.stringify(err));
+      const errCode = err?.error || err?.rawResponse?.error || "";
+      let reason = "تأكد من أن البوت لديه صلاحيات الإدارة في هذه المجموعة.";
+      if (errCode === 1976004 || String(err).includes("not an admin")) {
+        reason = "البوت ليس مشرفاً في هذه المجموعة. يرجى تعيينه كمشرف أولاً.";
+      } else if (errCode === 1357031 || String(err).includes("not a group")) {
+        reason = "هذا الأمر يعمل فقط في المجموعات.";
+      }
+      await api.sendMessage(`❌ | فشلت العملية.\n⚠️ | ${reason}`, threadID, messageID);
     }
   }
 }
