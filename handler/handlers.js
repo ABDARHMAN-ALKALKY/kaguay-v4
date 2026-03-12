@@ -108,19 +108,25 @@ export class CommandHandler {
     }
   }
 
-  handleEvent() {
-    try {
-      this.commands.forEach((event) => {
-        if (event.events) {
-          event.events({ ...this.arguments });
-        }
-      });
-      this.events.forEach((event) => {
-        event.execute({ ...this.arguments });
-      });
-    } catch (err) {
-      throw new Error(err);
-    }
+  async handleEvent() {
+    const promises = [];
+    this.commands.forEach((cmd) => {
+      if (cmd.events) {
+        promises.push(
+          Promise.resolve(cmd.events({ ...this.arguments })).catch((err) =>
+            console.error("Command event error:", err)
+          )
+        );
+      }
+    });
+    this.events.forEach((event) => {
+      promises.push(
+        Promise.resolve(event.execute({ ...this.arguments })).catch((err) =>
+          console.error("Event error:", err)
+        )
+      );
+    });
+    await Promise.all(promises);
   }
 
   async handleReply() {
