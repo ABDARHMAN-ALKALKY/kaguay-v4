@@ -37,7 +37,7 @@ class Help {
       allCommandsMsg += `إجمالي عدد الأوامر: ${totalCommands} أمر\n╰───────────────◊`;
       await api.sendMessage(allCommandsMsg, event.threadID);
     } else if (!isNaN(page) && page > 0 && page <= totalPages) {
-      let msg = `\n•—[قــائــمــة أوامــر مــيــكــو]—•\n`;
+      let msg = `\n•—[قــائــمــة أوامــر يــوكــو]—•\n`;
 
       const commandsToDisplay = commandList.slice(startIndex, endIndex);
       commandsToDisplay.forEach((command, index) => {
