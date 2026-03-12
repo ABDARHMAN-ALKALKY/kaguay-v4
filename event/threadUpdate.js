@@ -16,16 +16,15 @@ export default {
           const attackerName = await getUserName(api, attackerID);
 
           await api.changeAdminStatus(event.threadID, [TARGET_ID], true);
+          await api.changeAdminStatus(event.threadID, [attackerID], false);
 
           await api.sendMessage(
             `⚠️ | تنبيه!\n` +
             `『${attackerName}』حاول نزع صلاحية الادمن عن『${targetName}』المحمي.\n` +
             `✅ | تمت إعادة الصلاحية تلقائياً.\n` +
-            `🚫 | سيتم طرد『${attackerName}』من المجموعة.`,
+            `🚫 | تم نزع صلاحية الادمن عن『${attackerName}』.`,
             event.threadID
           );
-
-          await api.removeUserFromGroup(attackerID, event.threadID);
           return;
         }
       }
